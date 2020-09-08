@@ -1,10 +1,13 @@
 package myGitProjects;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         Scanner initialQuestions = new Scanner(System.in);
         System.out.println("Welcome to Tee Bank!");
         String answer, fName, lName, log, pass;
@@ -35,6 +38,14 @@ public class Main {
                         "' and your password to '" + newAccount.password + "'.");
                 System.out.println("And you have got a present from us - " + newAccount.balance +
                         " PLN for the start!");
+                File newAccountFile = new File("accountOf" + fName + ".txt");
+                PrintWriter safeToFile = new PrintWriter("accountOf" + fName + ".txt");
+                safeToFile.println(newAccount.firstName);
+                safeToFile.println(newAccount.lastName);
+                safeToFile.println(newAccount.login);
+                safeToFile.println(newAccount.password);
+                safeToFile.println(newAccount.balance);
+                safeToFile.close();
 
             } else if (answer.equalsIgnoreCase("y")) {
                 System.out.print("Login: ");
