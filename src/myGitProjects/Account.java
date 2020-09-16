@@ -1,8 +1,8 @@
 package myGitProjects;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Account {
@@ -19,7 +19,6 @@ public class Account {
         this.password = password;
         this.balance = balance;
     }
-
 
     public String getFirstName() { return firstName; }
 
@@ -131,21 +130,54 @@ public class Account {
         System.out.println("7. Logout");
     }
 
-    public static void deposit(File file) throws FileNotFoundException {
+    public static void deposit(File file) throws IOException {
         Account userAccount = collectDataFromFile(file);
 
         Scanner question = new Scanner (System.in);
-        System.out.println("How much do would you like to deposit?: ");
+        System.out.print("How much do would you like to deposit?: ");
         double deposit = question.nextDouble();
         userAccount.balance += deposit;
-        System.out.println("Wonderful, your new balance is: "
-                + userAccount.getBalance());
+        String depositInformation = "You have deposited " + deposit + " PLN, your new balance is: "
+                + userAccount.getBalance() + " PLN";
+        System.out.println(depositInformation);
 
         saveToFile(userAccount);
+        saveHistoryToFile(depositInformation, userAccount.getLogin(), userAccount.getPassword());
+    }
 
+    public static void withdrawal(File file) throws IOException {
+        Account userAccount = collectDataFromFile(file);
+
+        Scanner question = new Scanner (System.in);
+        System.out.print("How much do would you like to withdraw?: ");
+        double withdrawal = question.nextDouble();
+        userAccount.balance -= withdrawal;
+        String depositInformation = "You have withdrawn " + withdrawal + " PLN, your new balance is: "
+                + userAccount.getBalance() + " PLN";
+        System.out.println(depositInformation);
+
+        saveToFile(userAccount);
+        saveHistoryToFile(depositInformation, userAccount.getLogin(), userAccount.getPassword());
+
+    }
+
+    private static void saveHistoryToFile(String info, String login, String password) throws IOException {
+        FileWriter safeHistoryToFile = new FileWriter("historyAccountOf_" +
+                login.substring(login.length()-3, login.length())
+                + password.substring(password.length()-3, password.length()) + ".txt", true);
+        BufferedWriter infoOut = new BufferedWriter(safeHistoryToFile);
+
+        String actionInfo;
+        LocalDate today = LocalDate.now();
+
+        DateTimeFormatter plDateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        actionInfo = today.format(plDateFormat) + ": " + info;
+        infoOut.write(actionInfo + "\n");
+        infoOut.close();
 
     }
 }
+
 
 
 

@@ -2,11 +2,12 @@ package myGitProjects;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         Scanner initialQuestions = new Scanner(System.in);
         File accountFile = null;
         System.out.println("Welcome to Tee Bank!");
@@ -38,7 +39,7 @@ public class Main {
                 byte userChoice = initialQuestions.nextByte();
                 switch (userChoice) {
                     case 1 -> Account.deposit(accountFile);
-                    case 2 -> System.out.println("Wybrano 2");
+                    case 2 -> Account.withdrawal(accountFile);
                     case 3 -> System.out.println("Wybrano 3");
                     case 4 -> System.out.println("Wybrano 4");
                     case 5 -> System.out.println("Wybrano 5");
