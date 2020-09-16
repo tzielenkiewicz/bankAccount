@@ -8,11 +8,10 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner initialQuestions = new Scanner(System.in);
+        File accountFile = null;
         System.out.println("Welcome to Tee Bank!");
 
         String answer;
-        Scanner checkLoginPassword = new Scanner(System.in);
-        File checkFile = null;
 
         do {
             System.out.print("Have you already got an account? (y/n): ");
@@ -20,22 +19,52 @@ public class Main {
         } while (!answer.equalsIgnoreCase("y") && !answer.equalsIgnoreCase("n"));
 
 
-            if (answer.equalsIgnoreCase("n")) Account.setYourNewAccount();
+            if (answer.equalsIgnoreCase("n")) {
+                Account.setYourNewAccount();
+                accountFile = loginProcedure();
+            }
+
             else if (answer.equalsIgnoreCase("y")) {
-                System.out.print("Login: ");
-                String login = checkLoginPassword.nextLine();
-
-                System.out.print("Password: ");
-                String password = checkLoginPassword.nextLine();
-
-                checkFile = new File(("accountOf_" + login.substring(login.length() - 3, login.length())
-                        + password.substring(password.length() - 3, password.length()) + ".txt"));
-                Account.checkIfAccountExist(checkFile);
+                accountFile = loginProcedure();
+                Account.checkIfAccountExist(accountFile);
             }
 
             else System.out.println("Invalid character!");
 
-        Account.displayDashboard(checkFile);
+            boolean shouldContinue = true;
+            while (shouldContinue) {
+                Account.displayDashboard(accountFile);
+
+                byte userChoice = initialQuestions.nextByte();
+                switch (userChoice) {
+                    case 1 -> Account.deposit(accountFile);
+                    case 2 -> System.out.println("Wybrano 2");
+                    case 3 -> System.out.println("Wybrano 3");
+                    case 4 -> System.out.println("Wybrano 4");
+                    case 5 -> System.out.println("Wybrano 5");
+                    case 6 -> System.out.println("Wybrano 6");
+                    case 7 -> {
+                        System.out.println("Have a nice day, wish to see you soon!");
+                        System.out.println("Logging out...");
+                        shouldContinue = false;
+                    }
+                }
+            }
+    }
+
+    public static File loginProcedure() throws FileNotFoundException {
+        Scanner checkLoginPassword = new Scanner(System.in);
+        File checkFile = null;
+
+        System.out.print("Login: ");
+        String login = checkLoginPassword.nextLine();
+
+        System.out.print("Password: ");
+        String password = checkLoginPassword.nextLine();
+
+        checkFile = new File(("accountOf_" + login.substring(login.length() - 3, login.length())
+                + password.substring(password.length() - 3, password.length()) + ".txt"));
+        return checkFile;
     }
 
 }

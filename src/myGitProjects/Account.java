@@ -20,6 +20,7 @@ public class Account {
         this.balance = balance;
     }
 
+
     public String getFirstName() { return firstName; }
 
     public String getLastName() {
@@ -77,12 +78,12 @@ public class Account {
         safeToFile.close();
     }
 
-    public static void checkIfAccountExist(File checkFile) throws FileNotFoundException {
+    public static void checkIfAccountExist(File file) throws FileNotFoundException {
 
-        if (checkFile.isFile()) {
-            System.out.println("Welcome back " + collectDataFromFile(checkFile).getFirstName() + " " +
-                    collectDataFromFile(checkFile).getLastName() + "! Your balance is now: " +
-                    collectDataFromFile(checkFile).getBalance() + ".");
+        if (file.isFile()) {
+            System.out.println("Welcome back " + collectDataFromFile(file).getFirstName() + " " +
+                    collectDataFromFile(file).getLastName() + "! Your balance is now: " +
+                    collectDataFromFile(file).getBalance() + ".");
         }
         else {
             System.out.println("Account does not exist!");
@@ -112,17 +113,37 @@ public class Account {
     }
 
     public static void displayDashboard(File file) throws FileNotFoundException {
+        System.out.println();
         System.out.println("---------------------------------------------------------------");
         System.out.println("Name: " + Account.collectDataFromFile(file).getFirstName() + " " +
                 Account.collectDataFromFile(file).getLastName());
         System.out.println("Balance: " + Account.collectDataFromFile(file).getBalance());
+        System.out.println();
 
         System.out.println("Choose your action: ");
+        System.out.println();
         System.out.println("1. Deposit");
         System.out.println("2. Withdrawal");
         System.out.println("3. Show account history");
         System.out.println("4. Change your password");
         System.out.println("5. Create an account in another currency");
+        System.out.println("6. Other accounts");
+        System.out.println("7. Logout");
+    }
+
+    public static void deposit(File file) throws FileNotFoundException {
+        Account userAccount = collectDataFromFile(file);
+
+        Scanner question = new Scanner (System.in);
+        System.out.println("How much do would you like to deposit?: ");
+        double deposit = question.nextDouble();
+        userAccount.balance += deposit;
+        System.out.println("Wonderful, your new balance is: "
+                + userAccount.getBalance());
+
+        saveToFile(userAccount);
+
+
     }
 }
 
