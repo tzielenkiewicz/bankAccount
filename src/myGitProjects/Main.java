@@ -40,7 +40,7 @@ public class Main {
                 switch (userChoice) {
                     case 1 -> Account.deposit(accountFile);
                     case 2 -> Account.withdrawal(accountFile);
-                    case 3 -> System.out.println("Wybrano 3");
+                    case 3 -> Account.collectHistoryFromFile(accountFile);
                     case 4 -> System.out.println("Wybrano 4");
                     case 5 -> System.out.println("Wybrano 5");
                     case 6 -> System.out.println("Wybrano 6");

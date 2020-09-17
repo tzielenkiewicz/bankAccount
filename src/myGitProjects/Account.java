@@ -1,8 +1,11 @@
 package myGitProjects;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Account {
@@ -175,6 +178,28 @@ public class Account {
         infoOut.write(actionInfo + "\n");
         infoOut.close();
 
+    }
+
+    public static void collectHistoryFromFile(File file) throws IOException {
+        Account userAccount = collectDataFromFile(file);
+        String historyPath = "historyAccountOf_" +
+                userAccount.getLogin().substring(userAccount.getLogin().length()-3,
+                        userAccount.getLogin().length())+
+                userAccount.getPassword().substring(userAccount.getPassword().length()-3,
+                        userAccount.getPassword().length()) + ".txt";
+
+        File historyPathFile = new File(historyPath);
+
+        int historyFileLinesCount = (int) Files.lines(Paths.get(historyPath)).count();
+
+        String [] accountHistory = new String[historyFileLinesCount];
+
+
+        Scanner readHistoryFile = new Scanner(historyPathFile);
+        for (int i = 0; i < historyFileLinesCount; i++) {
+            accountHistory[i] = readHistoryFile.nextLine();
+            System.out.println(accountHistory[i]);
+        }
     }
 }
 
