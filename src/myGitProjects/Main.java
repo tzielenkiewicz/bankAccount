@@ -21,14 +21,14 @@ public class Main {
 
 
             if (answer.equalsIgnoreCase("n")) {
-                Account.setYourNewAccount();
-                accountFile = loginProcedure();
+
+                Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
             }
 
-            else if (answer.equalsIgnoreCase("y")) {
-                accountFile = loginProcedure();
-                Account.checkIfAccountExist(accountFile);
-            }
+            else if (answer.equalsIgnoreCase("y"))
+                accountFile = Account.checkIfAccountExist(Account.loginProcedure());
+
+
 
             else System.out.println("Invalid character!");
 
@@ -41,8 +41,22 @@ public class Main {
                     case 1 -> Account.deposit(accountFile);
                     case 2 -> Account.withdrawal(accountFile);
                     case 3 -> Account.collectHistoryFromFile(accountFile);
-                    case 4 -> System.out.println("Wybrano 4");
-                    case 5 -> System.out.println("Wybrano 5");
+                    case 4 -> {
+                        Account.changePassword(accountFile);
+                        shouldContinue = false;
+                    }
+
+                    case 5 -> {
+                        System.out.println("You can create an account in USD (1), EUR (2) or GPB (3)");
+                        System.out.print("What is your choice?: ");
+                        Scanner currencyChoice = new Scanner(System.in);
+                        byte choice = currencyChoice.nextByte();
+
+                        String currency;
+                        if (choice == 1) Account.createCurrencyAccount(currency = "USD", accountFile);
+                        else if (choice == 2) Account.createCurrencyAccount(currency = "EUR", accountFile);
+                        else if (choice == 3) Account.createCurrencyAccount(currency = "GBP", accountFile);
+                        }
                     case 6 -> System.out.println("Wybrano 6");
                     case 7 -> {
                         System.out.println("Have a nice day, wish to see you soon!");
@@ -52,21 +66,5 @@ public class Main {
                 }
             }
     }
-
-    public static File loginProcedure() throws FileNotFoundException {
-        Scanner checkLoginPassword = new Scanner(System.in);
-        File checkFile = null;
-
-        System.out.print("Login: ");
-        String login = checkLoginPassword.nextLine();
-
-        System.out.print("Password: ");
-        String password = checkLoginPassword.nextLine();
-
-        checkFile = new File(("accountOf_" + login.substring(login.length() - 3, login.length())
-                + password.substring(password.length() - 3, password.length()) + ".txt"));
-        return checkFile;
-    }
-
 }
 
