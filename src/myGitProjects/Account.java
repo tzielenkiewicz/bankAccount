@@ -26,7 +26,6 @@ public class Account {
         this.currency = currency;
     }
 
-
     public String getFirstName() { return firstName; }
 
     public String getLastName() {
@@ -47,7 +46,7 @@ public class Account {
 
     public String getCurrency() { return currency; }
 
-    public static File loginProcedure() throws FileNotFoundException {
+    public static File loginProcedure() {
         Scanner checkLoginPassword = new Scanner(System.in);
         File checkFile = null;
 
@@ -259,22 +258,19 @@ public class Account {
 
         System.out.println("You have successfully changed your password!");
 
-        File checkFileUSD = null;
-        checkFileUSD = new File("USDaccountOf_" +
+        File checkFileUSD = new File("USDaccountOf_" +
                 existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
                         existingAccount.getLogin().length()) +
                 existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
                         existingAccount.getPassword().length()) + ".txt");
 
-        File checkFileEUR = null;
-        checkFileEUR = new File("EURaccountOf_" +
+        File checkFileEUR = new File("EURaccountOf_" +
                 existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
                         existingAccount.getLogin().length()) +
                 existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
                         existingAccount.getPassword().length()) + ".txt");
 
-        File checkFileGBP = null;
-        checkFileGBP = new File("GBPaccountOf_" +
+        File checkFileGBP = new File("GBPaccountOf_" +
                 existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
                         existingAccount.getLogin().length()) +
                 existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
@@ -355,6 +351,88 @@ public class Account {
                 Account.collectDataFromFile(file).getLogin(),
                 Account.collectDataFromFile(file).getPassword(), 0, currency);
         saveToFile(currencyAccount);
+    }
+
+    public static void buyCurrency(File currencyFile, File accountFile) throws IOException {
+        Account currencyAccount = collectDataFromFile(currencyFile);
+        Account PLNAccount = collectDataFromFile(accountFile);
+        System.out.println("Exchange rates today:");
+        System.out.println("We sell USD: " + currencyRates()[0] + ", EUR: " + currencyRates()[2] + ", GBP: "
+                + currencyRates()[4]);
+        System.out.println("Wy buy USD: " + currencyRates()[1] + ", EUR: " + currencyRates()[3] + ", GBP: "
+                + currencyRates()[5]);
+        Scanner currencyOperation = new Scanner (System.in);
+        System.out.println("How much " + currencyAccount.currency + " would you like to buy?");
+        double deposit = currencyOperation.nextDouble();
+        double PLNWithdrawal = 0;
+
+        if (currencyAccount.getCurrency().equals("USD")) PLNWithdrawal = deposit*currencyRates()[0];
+        else if (currencyAccount.getCurrency().equals("EUR")) PLNWithdrawal = deposit*currencyRates()[2];
+        else if (currencyAccount.getCurrency().equals("GBP")) PLNWithdrawal = deposit*currencyRates()[4];
+
+
+        currencyAccount.balance += deposit;
+        String currencyInfo = "You have bought " + deposit + " " + currencyAccount.currency +
+                ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
+        saveToFile(currencyAccount);
+        saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
+
+        PLNAccount.balance -= PLNWithdrawal;
+        String PLNInfo = "There has been " + PLNWithdrawal + " PLN withdrawn for " + currencyAccount.currency +
+                " purchase, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
+        saveToFile(PLNAccount);
+        saveHistoryToFile(PLNInfo, PLNAccount.login, PLNAccount.password, PLNAccount.currency);
+
+        System.out.println(currencyInfo);
+        System.out.println(PLNInfo);
+
+    }
+
+    public static void sellCurrency(File currencyFile, File accountFile) throws IOException {
+        Account currencyAccount = collectDataFromFile(currencyFile);
+        Account PLNAccount = collectDataFromFile(accountFile);
+        System.out.println("Exchange rates today:");
+        System.out.println("We sell USD: " + currencyRates()[0] + ", EUR: " + currencyRates()[2] + ", GBP: "
+                + currencyRates()[4]);
+        System.out.println("Wy buy USD: " + currencyRates()[1] + ", EUR: " + currencyRates()[3] + ", GBP: "
+                + currencyRates()[5]);
+        Scanner currencyOperation = new Scanner (System.in);
+        System.out.println("How much " + currencyAccount.currency + " would you like to sell?");
+        double withdrawal = currencyOperation.nextDouble();
+        double PLNDeposit = 0;
+
+        if (currencyAccount.getCurrency().equals("USD")) PLNDeposit = withdrawal*currencyRates()[1];
+        else if (currencyAccount.getCurrency().equals("EUR")) PLNDeposit = withdrawal*currencyRates()[3];
+        else if (currencyAccount.getCurrency().equals("GBP")) PLNDeposit = withdrawal*currencyRates()[5];
+
+
+        currencyAccount.balance -= withdrawal;
+        String currencyInfo = "You have sold " + withdrawal + " " + currencyAccount.currency +
+                ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
+        saveToFile(currencyAccount);
+        saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
+
+        PLNAccount.balance += PLNDeposit;
+        String PLNInfo = "There has been " + PLNDeposit + " PLN deposited from " + currencyAccount.currency +
+                " sale, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
+        saveToFile(PLNAccount);
+        saveHistoryToFile(PLNInfo, PLNAccount.login, PLNAccount.password, PLNAccount.currency);
+
+        System.out.println(currencyInfo);
+        System.out.println(PLNInfo);
+
+    }
+
+    private static double[] currencyRates() {
+        double USDSellRate = 3.98;
+        double USDBuyRate = 3.83;
+        double EURSellRate = 4.29;
+        double EURBuyRate = 4.11;
+        double GBPSellRate = 4.75;
+        double GBPBuyRate = 4.59;
+
+        double[] ratesTable= {USDSellRate, USDBuyRate, EURSellRate, EURBuyRate, GBPSellRate, GBPBuyRate};
+        return ratesTable;
     }
 
 }

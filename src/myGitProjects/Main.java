@@ -118,6 +118,8 @@ public class Main {
                         case 1 -> Account.deposit(currencyFile);
                         case 2 -> Account.withdrawal(currencyFile);
                         case 3 -> Account.collectHistoryFromFile(currencyFile);
+                        case 4 -> Account.buyCurrency(currencyFile, accountFile);
+                        case 5 -> Account.sellCurrency(currencyFile, accountFile);
                     }
                 } while (choice !=6);
             }

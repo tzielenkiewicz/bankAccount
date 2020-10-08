@@ -1,6 +1,6 @@
 Jan
 Kowalski
 jankow123
-janeczek2
-7.0
-GBP
+janeczek1
+300.1
+PLN

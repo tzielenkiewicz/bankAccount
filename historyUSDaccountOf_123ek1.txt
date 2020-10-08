@@ -1,0 +1,5 @@
+08-10-2020: You have deposited 9.0 USD, your new balance is: 9.0 USD
+08-10-2020: You have bought 20.0 USD
+08-10-2020: You have sold 15.0 USD, your new balance is 14.0 USD
+08-10-2020: You have deposited 30.0 USD, your new balance is: 44.0 USD
+08-10-2020: You have sold 15.0 USD, your new balance is 29.0 USD
