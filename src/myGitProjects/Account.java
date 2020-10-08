@@ -170,28 +170,33 @@ public class Account {
         System.out.print("How much would you like to deposit?: ");
         double deposit = question.nextDouble();
         userAccount.balance += deposit;
-        String depositInformation = "You have deposited " + deposit + " " + userAccount.getCurrency() +
+        String depositInformation = "You have deposited " + deposit + " " + userAccount.currency +
                 ", your new balance is: "
-                + userAccount.getBalance() + userAccount.getCurrency();
+                + userAccount.balance + " " + userAccount.currency;
         System.out.println(depositInformation);
 
         saveToFile(userAccount);
-        saveHistoryToFile(depositInformation, userAccount.getLogin(), userAccount.getPassword(), userAccount.getCurrency());
+        saveHistoryToFile(depositInformation, userAccount.login, userAccount.password, userAccount.currency);
     }
 
     public static void withdrawal(File file) throws IOException {
         Account userAccount = collectDataFromFile(file);
 
         Scanner question = new Scanner (System.in);
-        System.out.print("How much would you like to withdraw?: ");
-        double withdrawal = question.nextDouble();
+        double withdrawal;
+        do {
+            System.out.print("How much would you like to withdraw?: ");
+            withdrawal = question.nextDouble();
+            if (withdrawal > userAccount.balance) System.out.println("Not enough funds!");
+        } while (withdrawal > userAccount.balance);
+
         userAccount.balance -= withdrawal;
-        String depositInformation = "You have withdrawn " + withdrawal + " " + userAccount.getCurrency() + ", your new balance is: "
-                + userAccount.getBalance() + " PLN";
+        String depositInformation = "You have withdrawn " + withdrawal + " " + userAccount.currency + ", your new balance is: "
+                + userAccount.balance + " " + userAccount.currency;
         System.out.println(depositInformation);
 
         saveToFile(userAccount);
-        saveHistoryToFile(depositInformation, userAccount.getLogin(), userAccount.getPassword(), userAccount.getCurrency());
+        saveHistoryToFile(depositInformation, userAccount.login, userAccount.password, userAccount.currency);
 
     }
 
@@ -249,8 +254,33 @@ public class Account {
             newPassword2 = changePassword.nextLine();
             if (!newPassword1.equals(newPassword2)) System.out.println(
                     "Confirmation did not succeed! Try once again.");
-            else {
-                System.out.println("You have successfully changed your password!");
+        }
+        while (!newPassword1.equals(newPassword2));
+
+        System.out.println("You have successfully changed your password!");
+
+        File checkFileUSD = null;
+        checkFileUSD = new File("USDaccountOf_" +
+                existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
+                        existingAccount.getLogin().length()) +
+                existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
+                        existingAccount.getPassword().length()) + ".txt");
+
+        File checkFileEUR = null;
+        checkFileEUR = new File("EURaccountOf_" +
+                existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
+                        existingAccount.getLogin().length()) +
+                existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
+                        existingAccount.getPassword().length()) + ".txt");
+
+        File checkFileGBP = null;
+        checkFileGBP = new File("GBPaccountOf_" +
+                existingAccount.getLogin().substring(existingAccount.getLogin().length() - 3,
+                        existingAccount.getLogin().length()) +
+                existingAccount.getPassword().substring(existingAccount.getPassword().length() - 3,
+                        existingAccount.getPassword().length()) + ".txt");
+
+
                 existingAccount = new Account(existingAccount.getFirstName(),
                         existingAccount.getLastName(), existingAccount.getLogin(),
                         newPassword1, existingAccount.getBalance(),
@@ -265,13 +295,56 @@ public class Account {
                 Files.move(Paths.get(historyFilePath), Paths.get(newHistoryFilePath),
                         StandardCopyOption.REPLACE_EXISTING);
 
+                if (checkFileUSD.isFile()) {
+                     String checkFileUSDPath = checkFileUSD.toString();
+                     String historyCheckFileUSDPath = "historyUSDaccountOf_" + checkFileUSDPath.substring(13, checkFileUSDPath.length());
+                    String newHistoryCheckFileUSDPath = "historyUSDaccountOf_" + filePath.substring(13, 16) +
+                            existingAccount.getPassword().substring(existingAccount.getPassword().length()-3,
+                                    existingAccount.getPassword().length()) + ".txt";
+                     Account USDaccount = new Account(existingAccount.getFirstName(), existingAccount.getLastName(),
+                             existingAccount.getLogin(), existingAccount.getPassword(),
+                             collectDataFromFile(checkFileUSD).getBalance(), "USD");
+                     saveToFile(USDaccount);
+                     checkFileUSD.delete();
+                    Files.move(Paths.get(historyCheckFileUSDPath), Paths.get(newHistoryCheckFileUSDPath),
+                            StandardCopyOption.REPLACE_EXISTING);
+                 }
+                if (checkFileEUR.isFile()) {
+                    String checkFileEURPath = checkFileEUR.toString();
+                    String historyCheckFileEURPath = "historyEURaccountOf_" + checkFileEURPath.substring(13, checkFileEURPath.length());
+                    String newHistoryCheckFileEURPath = "historyEURaccountOf_" + filePath.substring(13, 16) +
+                            existingAccount.getPassword().substring(existingAccount.getPassword().length()-3,
+                                    existingAccount.getPassword().length()) + ".txt";
+                    Account EURaccount = new Account(existingAccount.getFirstName(), existingAccount.getLastName(),
+                            existingAccount.getLogin(), existingAccount.getPassword(),
+                            collectDataFromFile(checkFileEUR).getBalance(), "EUR");
+                    saveToFile(EURaccount);
+                    checkFileEUR.delete();
+                    Files.move(Paths.get(historyCheckFileEURPath), Paths.get(newHistoryCheckFileEURPath),
+                            StandardCopyOption.REPLACE_EXISTING);
+                }
+                if (checkFileGBP.isFile()) {
+                    String checkFileGBPPath = checkFileGBP.toString();
+                    String historyCheckFileGBPPath = "historyGBPaccountOf_" + checkFileGBPPath.substring(13, checkFileGBPPath.length());
+                    String newHistoryCheckFileGBPPath = "historyGBPaccountOf_" + filePath.substring(13, 16) +
+                            existingAccount.getPassword().substring(existingAccount.getPassword().length()-3,
+                                    existingAccount.getPassword().length()) + ".txt";
+                    Account GBPaccount = new Account(existingAccount.getFirstName(), existingAccount.getLastName(),
+                            existingAccount.getLogin(), existingAccount.getPassword(),
+                            collectDataFromFile(checkFileGBP).getBalance(), "GBP");
+                    saveToFile(GBPaccount);
+                    checkFileGBP.delete();
+                    Files.move(Paths.get(historyCheckFileGBPPath), Paths.get(newHistoryCheckFileGBPPath),
+                            StandardCopyOption.REPLACE_EXISTING);
+                }
+
                 file.delete();
                 Account.saveToFile(existingAccount);
+
                 System.out.println("You have to log out now.");
                 System.out.println("Logging out...");
-            }
-        }
-        while (!newPassword1.equals(newPassword2));
+
+
     }
 
     public static void createCurrencyAccount(String currency, File file) throws FileNotFoundException {
