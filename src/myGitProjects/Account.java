@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Account {
@@ -364,20 +365,22 @@ public class Account {
         Scanner currencyOperation = new Scanner (System.in);
         System.out.println("How much " + currencyAccount.currency + " would you like to buy?");
         double deposit = currencyOperation.nextDouble();
-        double PLNWithdrawal = 0;
+        double PLNWithdrawal = switch (currencyAccount.getCurrency()) {
+            case "USD" -> deposit * currencyRates()[0];
+            case "EUR" -> deposit * currencyRates()[2];
+            case "GBP" -> deposit * currencyRates()[4];
+            default -> 0;
+        };
 
-        if (currencyAccount.getCurrency().equals("USD")) PLNWithdrawal = deposit*currencyRates()[0];
-        else if (currencyAccount.getCurrency().equals("EUR")) PLNWithdrawal = deposit*currencyRates()[2];
-        else if (currencyAccount.getCurrency().equals("GBP")) PLNWithdrawal = deposit*currencyRates()[4];
-
-
-        currencyAccount.balance += deposit;
+        double roundedDeposit = Math.round(deposit*100);
+        currencyAccount.balance += roundedDeposit / 100;
         String currencyInfo = "You have bought " + deposit + " " + currencyAccount.currency +
                 ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
         saveToFile(currencyAccount);
         saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
 
-        PLNAccount.balance -= PLNWithdrawal;
+        double roundedPLNWithdrawal = Math.round(PLNWithdrawal*100);
+        PLNAccount.balance -= roundedPLNWithdrawal / 100;
         String PLNInfo = "There has been " + PLNWithdrawal + " PLN withdrawn for " + currencyAccount.currency +
                 " purchase, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
         saveToFile(PLNAccount);
@@ -399,20 +402,22 @@ public class Account {
         Scanner currencyOperation = new Scanner (System.in);
         System.out.println("How much " + currencyAccount.currency + " would you like to sell?");
         double withdrawal = currencyOperation.nextDouble();
-        double PLNDeposit = 0;
+        double PLNDeposit = switch (currencyAccount.getCurrency()) {
+            case "USD" -> withdrawal * currencyRates()[1];
+            case "EUR" -> withdrawal * currencyRates()[3];
+            case "GBP" -> withdrawal * currencyRates()[5];
+            default -> 0;
+        };
 
-        if (currencyAccount.getCurrency().equals("USD")) PLNDeposit = withdrawal*currencyRates()[1];
-        else if (currencyAccount.getCurrency().equals("EUR")) PLNDeposit = withdrawal*currencyRates()[3];
-        else if (currencyAccount.getCurrency().equals("GBP")) PLNDeposit = withdrawal*currencyRates()[5];
-
-
-        currencyAccount.balance -= withdrawal;
+        double roundedWithdrawal = Math.round(withdrawal*100);
+        currencyAccount.balance -= roundedWithdrawal/100;
         String currencyInfo = "You have sold " + withdrawal + " " + currencyAccount.currency +
                 ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
         saveToFile(currencyAccount);
         saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
 
-        PLNAccount.balance += PLNDeposit;
+        double roundedPLNDeposit = Math.round(PLNDeposit*100);
+        PLNAccount.balance += roundedPLNDeposit / 100;
         String PLNInfo = "There has been " + PLNDeposit + " PLN deposited from " + currencyAccount.currency +
                 " sale, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
         saveToFile(PLNAccount);
@@ -424,15 +429,17 @@ public class Account {
     }
 
     private static double[] currencyRates() {
-        double USDSellRate = 3.98;
-        double USDBuyRate = 3.83;
-        double EURSellRate = 4.29;
-        double EURBuyRate = 4.11;
-        double GBPSellRate = 4.75;
-        double GBPBuyRate = 4.59;
+        Random generator = new Random();
+        double diff = Math.round(generator.nextDouble()*20);
 
-        double[] ratesTable= {USDSellRate, USDBuyRate, EURSellRate, EURBuyRate, GBPSellRate, GBPBuyRate};
-        return ratesTable;
+        double USDSellRate = 400 - diff;
+        double USDBuyRate = 380 - diff;
+        double EURSellRate = 440 - diff;
+        double EURBuyRate = 420 - diff;
+        double GBPSellRate = 480 - diff;
+        double GBPBuyRate = 460 - diff;
+
+        return new double[]{USDSellRate/100, USDBuyRate/100, EURSellRate/100, EURBuyRate/100, GBPSellRate/100, GBPBuyRate/100};
     }
 
 }

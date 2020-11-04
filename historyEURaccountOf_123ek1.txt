@@ -1,2 +1,5 @@
 08-10-2020: You have deposited 8.0 EUR, your new balance is: 8.0 EUR
 08-10-2020: You have bought 5.0 EUR
+04-11-2020: You have bought 5.0 EUR, your new balance is 18.0 EUR
+04-11-2020: You have bought 1.0 EUR, your new balance is 19.0 EUR
+04-11-2020: You have bought 1.0 EUR, your new balance is 20.0 EUR

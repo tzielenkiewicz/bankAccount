@@ -5,3 +5,10 @@
 08-10-2020: There has been 23.75 PLN withdrawn for GBP purchase, your new balance is 185.20000000000002 PLN
 08-10-2020: There has been 57.45 PLN deposited from USD sale, your new balance is 242.65000000000003 PLN
 08-10-2020: There has been 57.45 PLN deposited from USD sale, your new balance is 300.1 PLN
+04-11-2020: There has been 22.0 PLN withdrawn for EUR purchase, your new balance is 278.1 PLN
+04-11-2020: There has been 9.4 PLN deposited from GBP sale, your new balance is 287.5 PLN
+04-11-2020: There has been 14.100000000000001 PLN deposited from GBP sale, your new balance is 301.6 PLN
+04-11-2020: There has been 4.21 PLN withdrawn for EUR purchase, your new balance is 297.39000000000004 PLN
+04-11-2020: There has been 4.28 PLN withdrawn for EUR purchase, your new balance is 293.11000000000007 PLN
+04-11-2020: There has been 7.38 PLN deposited from USD sale, your new balance is 300.49000000000007 PLN
+04-11-2020: There has been 9.18 PLN deposited from GBP sale, your new balance is 309.6700000000001 PLN
