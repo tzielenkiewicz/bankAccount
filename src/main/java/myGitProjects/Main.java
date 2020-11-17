@@ -1,9 +1,10 @@
 package myGitProjects;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.InputMismatchException;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
@@ -11,8 +12,13 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Scanner initialQuestions = new Scanner(System.in);
         File accountFile = null;
-        System.out.println("Welcome to Tee Bank!");
+        String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+        String DB_URL = "jdbc:mysql://localhost/test";
+        String USER = "root";
+        String PASSWORD = "Tomeczek1";
 
+        System.out.println("Welcome to Tee Bank!");
+        DBConnection myConnection = new DBConnection(JDBC_DRIVER, DB_URL, USER, PASSWORD);
         String answer;
 
         do {
@@ -23,7 +29,52 @@ public class Main {
 
             if (answer.equalsIgnoreCase("n")) {
 
-                Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
+                System.out.println("If you want to join us, enter some details about you and your future account, " +
+                        "please: ");
+                System.out.print("What is your name?: ");
+                String firstName = initialQuestions.nextLine();
+                System.out.print("What is your last name?: ");
+                String lastName = initialQuestions.nextLine();
+
+                String login = firstName.toLowerCase() + lastName.substring(0, 4).toLowerCase() +
+                        lastName.substring(lastName.length()-3, lastName.length());
+                System.out.println("Remember your login, please: " + login);
+                System.out.print("Choose your password: ");
+                String password = initialQuestions.nextLine();
+
+                double balance = 100;
+                String currency = "PLN";
+
+                Account newAccount = new Account(firstName, lastName,
+                        login, password, balance, currency);
+                Connection conn;
+                Statement stmt;
+                String actionInfo = "Gift for the beginning";
+                LocalDate today = LocalDate.now();
+
+                try {
+
+                    conn = DBConnection.connectionProcedure(myConnection);
+                    //conn = DriverManager.getConnection("jdbc:mysql://localhost/bank", "root", "Tomeczek1");
+                    stmt = conn.createStatement();
+
+                    stmt.executeUpdate("INSERT INTO customers VALUES(null, '" + firstName + "', '" + lastName +
+                            "', '" + login + "', '" + password + "');");
+                    stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
+                            + currency + "', '" + today + "', '" + actionInfo + "', " + balance + ");");
+
+                    stmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("Hello " + newAccount.getFirstName() + " " + newAccount.getLastName() + ", " +
+                        "you have established your login to '" + newAccount.getLogin() +
+                        "' and your password to '" + newAccount.getPassword() + "'.");
+                System.out.println("And you have got a present from us - " + balance +
+                        newAccount.getCurrency() + "for the start!");
+                System.exit(0);
+                //Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
             }
 
             else if (answer.equalsIgnoreCase("y"))

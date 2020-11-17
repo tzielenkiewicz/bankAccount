@@ -4,6 +4,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -81,6 +85,8 @@ public class Account {
         Account newAccount = new Account(firstName, lastName,
                 login, password, balance, currency);
         saveToFile(newAccount);
+
+
 
         System.out.println("Hello " + newAccount.getFirstName() + " " + newAccount.getLastName() + ", " +
                 "you have established " + "your login to '" + newAccount.getLogin() +
