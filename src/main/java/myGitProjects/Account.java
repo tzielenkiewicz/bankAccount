@@ -150,12 +150,12 @@ public class Account {
         accountDataSet[5]);
     }
 
-    public static void displayDashboard(File file) throws FileNotFoundException {
+    public static void displayDashboard(Account existingAccount) throws FileNotFoundException {
         System.out.println();
         System.out.println("---------------------------------------------------------------");
-        System.out.println("Name: " + Account.collectDataFromFile(file).getFirstName() + " " +
-                Account.collectDataFromFile(file).getLastName());
-        System.out.println("Balance: " + Account.collectDataFromFile(file).getBalance() + Account.collectDataFromFile(file).getCurrency());
+        System.out.println("Name: " + existingAccount.getFirstName() + " " +
+                existingAccount.getLastName());
+        System.out.println("Balance: " + existingAccount.getBalance() + existingAccount.getCurrency());
         System.out.println();
 
         System.out.println("Choose your action: ");

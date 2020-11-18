@@ -2,14 +2,16 @@ package myGitProjects;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         Scanner initialQuestions = new Scanner(System.in);
         File accountFile = null;
         String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -28,6 +30,7 @@ public class Main {
 
 
             if (answer.equalsIgnoreCase("n")) {
+                //set new account procedure
 
                 System.out.println("If you want to join us, enter some details about you and your future account, " +
                         "please: ");
@@ -47,21 +50,25 @@ public class Main {
 
                 Account newAccount = new Account(firstName, lastName,
                         login, password, balance, currency);
-                Connection conn;
-                Statement stmt;
+
                 String actionInfo = "Gift for the beginning";
                 LocalDate today = LocalDate.now();
 
                 try {
 
-                    conn = DBConnection.connectionProcedure(myConnection);
+                    Connection conn = DBConnection.connectionProcedure(myConnection);
                     //conn = DriverManager.getConnection("jdbc:mysql://localhost/bank", "root", "Tomeczek1");
-                    stmt = conn.createStatement();
+                    Statement stmt = conn.createStatement();
 
                     stmt.executeUpdate("INSERT INTO customers VALUES(null, '" + firstName + "', '" + lastName +
                             "', '" + login + "', '" + password + "');");
-                    stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
-                            + currency + "', '" + today + "', '" + actionInfo + "', " + balance + ");");
+                    stmt.executeUpdate("INSERT INTO accounts VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
+                    + currency + "', '" + balance + "');");
+                    stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM accounts WHERE currency = '"
+                            + currency +"' AND customerID = (SELECT ID FROM customers WHERE login = '" + login + "')), '"
+                            + today + "', '" + actionInfo + "', " + balance + ");");
+                    //stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
+                      //      + currency + "', '" + today + "', '" + actionInfo + "', " + balance + ");");
 
                     stmt.close();
                 } catch (SQLException e) {
@@ -73,18 +80,63 @@ public class Main {
                         "' and your password to '" + newAccount.getPassword() + "'.");
                 System.out.println("And you have got a present from us - " + balance +
                         newAccount.getCurrency() + "for the start!");
+                System.out.println("Now start the app once again and input your new login and password, please...");
+
+
                 System.exit(0);
                 //Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
             }
 
-            else if (answer.equalsIgnoreCase("y"))
-                accountFile = Account.checkIfAccountExist(Account.loginProcedure());
+            else if (answer.equalsIgnoreCase("y")) {
+                //login procedure
+
+                Scanner checkLoginPassword = new Scanner(System.in);
+
+
+                System.out.print("Login: ");
+                String login = checkLoginPassword.nextLine();
+
+                System.out.print("Password: ");
+                String password = checkLoginPassword.nextLine();
+
+
+                Connection conn = DBConnection.connectionProcedure(myConnection);
+
+                Statement stmt = null;
+                try {
+                    stmt = conn.createStatement();
+                    String sql;
+                    sql = "SELECT name, lastName FROM customers WHERE login = '" + login + "';";
+                    ResultSet rs = stmt.executeQuery(sql);
+                    while (rs.next()) {
+                        String name = rs.getString("name");
+                        String surname = rs.getString("lastName");
+
+                        Account existingAccount = new Account(name, surname, login, password, 100, "PLN");
+                        Account.displayDashboard(existingAccount);
+                    }
+
+                    rs.close();
+                    stmt.close();
+
+
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+
+
+
+
+            }
+
+
+                //accountFile = Account.checkIfAccountExist(Account.loginProcedure());
 
             else System.out.println("Invalid character!");
 
             boolean shouldContinue = true;
             while (shouldContinue) {
-                Account.displayDashboard(accountFile);
+
                 //byte userChoice = 0;
 
                 //try {
