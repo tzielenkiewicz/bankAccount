@@ -1,5 +1,7 @@
 package myGitProjects;
 
+import org.w3c.dom.ls.LSOutput;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -13,14 +15,15 @@ public class Main {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Scanner initialQuestions = new Scanner(System.in);
-        File accountFile = null;
+        Account existingAccount = null;
+        /*File accountFile = null;
         String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
         String DB_URL = "jdbc:mysql://localhost/test";
         String USER = "root";
-        String PASSWORD = "Tomeczek1";
+        String PASSWORD = "Tomeczek1"; */
 
         System.out.println("Welcome to Tee Bank!");
-        DBConnection myConnection = new DBConnection(JDBC_DRIVER, DB_URL, USER, PASSWORD);
+        //DBConnection myConnection = new DBConnection(JDBC_DRIVER, DB_URL, USER, PASSWORD);
         String answer;
 
         do {
@@ -30,130 +33,35 @@ public class Main {
 
 
             if (answer.equalsIgnoreCase("n")) {
-                //set new account procedure
-
-                System.out.println("If you want to join us, enter some details about you and your future account, " +
-                        "please: ");
-                System.out.print("What is your name?: ");
-                String firstName = initialQuestions.nextLine();
-                System.out.print("What is your last name?: ");
-                String lastName = initialQuestions.nextLine();
-
-                String login = firstName.toLowerCase() + lastName.substring(0, 4).toLowerCase() +
-                        lastName.substring(lastName.length()-3, lastName.length());
-                System.out.println("Remember your login, please: " + login);
-                System.out.print("Choose your password: ");
-                String password = initialQuestions.nextLine();
-
-                double balance = 100;
-                String currency = "PLN";
-
-                Account newAccount = new Account(firstName, lastName,
-                        login, password, balance, currency);
-
-                String actionInfo = "Gift for the beginning";
-                LocalDate today = LocalDate.now();
-
-                try {
-
-                    Connection conn = DBConnection.connectionProcedure(myConnection);
-                    //conn = DriverManager.getConnection("jdbc:mysql://localhost/bank", "root", "Tomeczek1");
-                    Statement stmt = conn.createStatement();
-
-                    stmt.executeUpdate("INSERT INTO customers VALUES(null, '" + firstName + "', '" + lastName +
-                            "', '" + login + "', '" + password + "');");
-                    stmt.executeUpdate("INSERT INTO accounts VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
-                    + currency + "', '" + balance + "');");
-                    stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM accounts WHERE currency = '"
-                            + currency +"' AND customerID = (SELECT ID FROM customers WHERE login = '" + login + "')), '"
-                            + today + "', '" + actionInfo + "', " + balance + ");");
-                    //stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM customers WHERE login = '" + login + "'), '"
-                      //      + currency + "', '" + today + "', '" + actionInfo + "', " + balance + ");");
-
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                System.out.println("Hello " + newAccount.getFirstName() + " " + newAccount.getLastName() + ", " +
-                        "you have established your login to '" + newAccount.getLogin() +
-                        "' and your password to '" + newAccount.getPassword() + "'.");
-                System.out.println("And you have got a present from us - " + balance +
-                        newAccount.getCurrency() + "for the start!");
-                System.out.println("Now start the app once again and input your new login and password, please...");
-
-
-                System.exit(0);
+                Account.setYourNewAccount();
                 //Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
             }
 
             else if (answer.equalsIgnoreCase("y")) {
-                //login procedure
-
-                Scanner checkLoginPassword = new Scanner(System.in);
-
-
-                System.out.print("Login: ");
-                String login = checkLoginPassword.nextLine();
-
-                System.out.print("Password: ");
-                String password = checkLoginPassword.nextLine();
-
-
-                Connection conn = DBConnection.connectionProcedure(myConnection);
-
-                Statement stmt = null;
-                try {
-                    stmt = conn.createStatement();
-                    String sql;
-                    sql = "SELECT name, lastName FROM customers WHERE login = '" + login + "';";
-                    ResultSet rs = stmt.executeQuery(sql);
-                    while (rs.next()) {
-                        String name = rs.getString("name");
-                        String surname = rs.getString("lastName");
-
-                        Account existingAccount = new Account(name, surname, login, password, 100, "PLN");
-                        Account.displayDashboard(existingAccount);
-                    }
-
-                    rs.close();
-                    stmt.close();
-
-
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                existingAccount = Account.loginProcedure();
+                if (existingAccount == null) {
+                    System.out.println("Seems that you are first time here!");
+                    Account.setYourNewAccount();
                 }
-
-
-
-
             }
-
-
-                //accountFile = Account.checkIfAccountExist(Account.loginProcedure());
 
             else System.out.println("Invalid character!");
 
             boolean shouldContinue = true;
             while (shouldContinue) {
+                Account.displayDashboard(existingAccount);
 
-                //byte userChoice = 0;
-
-                //try {
                     byte userChoice = initialQuestions.nextByte();
-                //}
-                //catch (InputMismatchException e) {
-                  //  System.out.println("Wrong format! Try once again: ");
-                //}
+
                     switch (userChoice) {
-                        case 1 -> Account.deposit(accountFile);
-                        case 2 -> Account.withdrawal(accountFile);
-                        case 3 -> Account.collectHistoryFromFile(accountFile);
+                        case 1 -> Account.deposit(existingAccount);
+                        case 2 -> Account.withdrawal(existingAccount);
+                        case 3 -> System.out.println("Collect history from DB");
                         case 4 -> {
-                            Account.changePassword(accountFile);
+                            System.out.println("Change password");
                             shouldContinue = false;
                         }
-
+/*
                         case 5 -> {
                             System.out.println("You can create an account in USD (1), EUR (2) or GPB (3)");
                             System.out.print("What is your choice?: ");
@@ -165,8 +73,8 @@ public class Main {
                             else if (choice == 2) Account.createCurrencyAccount(currency = "EUR", accountFile);
                             else if (choice == 3) Account.createCurrencyAccount(currency = "GBP", accountFile);
                         }
-                        case 6 -> currencyAccountsOperation(accountFile);
-
+                        case 6 -> currencyAccountsOperation(existingAccount);
+*/
                         case 7 -> {
                             System.out.println("Have a nice day, wish to see you soon!");
                             System.out.println("Logging out...");
@@ -177,8 +85,8 @@ public class Main {
             }
 
         }
-
-    private static void currencyAccountsOperation(File accountFile) throws IOException {
+/*
+    private static void currencyAccountsOperation(Account account) throws IOException {
         String[] currency = {"USD", "EUR", "GBP"};
         for (int i=1; i<=3; i++) {
             File checkCurrencyFile = new File(currency[i-1] +"accountOf_" +
@@ -218,7 +126,7 @@ public class Main {
                         if (choice < 1 || choice > 6) System.out.println("Choose from 1 to 6");
                     } while (choice < 1 || choice > 6);
                     switch (choice) {
-                        case 1 -> Account.deposit(currencyFile);
+                        case 1 -> Account.deposit(existingAccount);
                         case 2 -> Account.withdrawal(currencyFile);
                         case 3 -> Account.collectHistoryFromFile(currencyFile);
                         case 4 -> Account.buyCurrency(currencyFile, accountFile);
@@ -227,6 +135,6 @@ public class Main {
                 } while (choice !=6);
             }
         }
-    }
+    } */
 }
 

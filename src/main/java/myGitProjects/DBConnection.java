@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 public class DBConnection {
     private String JDBC_DRIVER;
@@ -35,7 +36,7 @@ public class DBConnection {
         return PASSWORD;
     }
 
-    public static Connection connectionProcedure (DBConnection myConnection) {
+    public static Connection connectionProcedure () {
         String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
         String DB_URL = "jdbc:mysql://localhost/bank";
         String USER = "root";
@@ -46,25 +47,63 @@ public class DBConnection {
             Class.forName(JDBC_DRIVER);
 
             conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            System.out.println("Connection ready!");
+            //Thread.sleep(500);
         } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Nie udało się nawiązać połączenia");
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
         }
         return conn;
     }
 
-    public static void safeNewCustomer(String name, String lastName, String login, String password, DBConnection myConnection) {
+    public static void createNewCustomer(Account newAccount, Statement stmt) {
         try {
-            String sql = String.format("INSERT INTO customers VALUES(null, '%s', '%s', '%s', '%s')",
-                    name, lastName, login, password);
-            System.out.println(sql);
-            Statement stmt = connectionProcedure(myConnection).createStatement();
-
-            stmt.executeUpdate(sql);
-            stmt.close();
-
+            stmt.executeUpdate("INSERT INTO customers VALUES(null, '" + newAccount.getFirstName() + "', '"
+                    + newAccount.getLastName() + "', '" + newAccount.getLogin() + "', '"
+                    + newAccount.getPassword() + "');");
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
         }
+    }
 
+    public static void createNewAccount(Account newAccount, Statement stmt) {
+        try {
+            stmt.executeUpdate("INSERT INTO accounts VALUES(null, (SELECT ID FROM customers WHERE login = '"
+                    + newAccount.getLogin() + "'), '" + newAccount.getCurrency() + "', '"
+                    + newAccount.getBalance() + "');");
+        } catch (SQLException throwables) {
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
+        }
+    }
+
+    public static void saveOperationsHistory(Account account, Statement stmt, String actionInfo) {
+        LocalDate today = LocalDate.now();
+        try {
+            stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM accounts WHERE currency = '"
+                    + account.getCurrency() +"' AND customerID = (SELECT ID FROM customers WHERE login = '"
+                    + account.getLogin() + "')), '" + today + "', '" + actionInfo + "', "
+                    + account.getBalance() + ");");
+        } catch (SQLException throwables) {
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
+        }
+    }
+
+    public static void saveAccountBalance(Account account, Statement stmt) {
+        try {
+            stmt.executeUpdate("UPDATE accounts, customers SET currentBalance = "
+                    + account.getBalance() + " WHERE customers.login = '"
+                    + account.getLogin() + "' AND customers.ID = accounts.customerID;");
+        } catch (SQLException throwables) {
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
+        }
     }
 }

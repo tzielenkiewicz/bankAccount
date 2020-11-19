@@ -4,10 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -51,64 +48,92 @@ public class Account {
 
     public String getCurrency() { return currency; }
 
-    public static File loginProcedure() {
+    public static Account loginProcedure() {
+
         Scanner checkLoginPassword = new Scanner(System.in);
-        File checkFile = null;
 
         System.out.print("Login: ");
         String login = checkLoginPassword.nextLine();
-
         System.out.print("Password: ");
         String password = checkLoginPassword.nextLine();
 
-        checkFile = new File("PLNaccountOf_" + login.substring(login.length() - 3, login.length())
-                + password.substring(password.length() - 3, password.length()) + ".txt");
+        Connection conn = DBConnection.connectionProcedure();
 
-        return checkFile;
+        Statement stmt = null;
+        Account existingAccount = null;
+        try {
+            stmt = conn.createStatement();
+            String sql;
+            sql = "SELECT customers.name, customers.lastName, accounts.currentBalance FROM customers, accounts WHERE customers.login = '"
+                    + login + "' AND customers.ID = accounts.customerID;";
+            ResultSet rs = stmt.executeQuery(sql);
+            String name, surname;
+            double balance;
+            while (rs.next()) {
+                name = rs.getString("name");
+                System.out.println(name);
+                surname = rs.getString("lastName");
+                System.out.println(surname);
+                balance = rs.getDouble("currentBalance");
+                System.out.println(balance);
+                existingAccount = new Account(name, surname, login, password, balance, "PLN");
+                System.out.println(existingAccount.getPassword());
+            }
+
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return existingAccount;
     }
-    public static File setYourNewAccount() throws FileNotFoundException {
+    public static void setYourNewAccount() {
         Scanner initialQuestions = new Scanner(System.in);
+
         System.out.println("If you want to join us, enter some details about you and your future account, " +
                 "please: ");
         System.out.print("What is your name?: ");
         String firstName = initialQuestions.nextLine();
         System.out.print("What is your last name?: ");
         String lastName = initialQuestions.nextLine();
-        System.out.print("Choose your login: ");
-        String login = initialQuestions.nextLine();
+
+        String login = firstName.toLowerCase() + lastName.substring(0, 4).toLowerCase() +
+                lastName.substring(lastName.length()-3, lastName.length());
+        System.out.println("Remember your login, please: " + login);
         System.out.print("Choose your password: ");
         String password = initialQuestions.nextLine();
 
-        double balance = 100;
-        String currency = "PLN";
-
         Account newAccount = new Account(firstName, lastName,
-                login, password, balance, currency);
-        saveToFile(newAccount);
+                login, password, 100, "PLN");
+
+        String actionInfo = "Gift for the beginning";
 
 
+        try {
+
+            Connection conn = DBConnection.connectionProcedure();
+            Statement stmt = conn.createStatement();
+            DBConnection.createNewCustomer(newAccount, stmt);
+            DBConnection.createNewAccount(newAccount, stmt);
+            DBConnection.saveOperationsHistory(newAccount, stmt, actionInfo);
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("--------------------------");
+            System.out.println("Statement creation failed!");
+            System.out.println("--------------------------");
+        }
 
         System.out.println("Hello " + newAccount.getFirstName() + " " + newAccount.getLastName() + ", " +
-                "you have established " + "your login to '" + newAccount.getLogin() +
-                "' and your password to '" + newAccount.getPassword() + "'.");
-        System.out.println("And you have got a present from us - " + balance +
+                "your login is '" + newAccount.getLogin() +
+                "' and your password '" + newAccount.getPassword() + "'.");
+        System.out.println("And you have got a present from us - " + newAccount.getBalance() +
                 newAccount.getCurrency() + "for the start!");
-        return loginProcedure();
+        System.out.println("Now start the app once again and input your new login and password, please...");
 
+        System.exit(0);
     }
 
-    static void saveToFile(Account account) throws FileNotFoundException {
-        PrintWriter safeToFile = new PrintWriter(account.getCurrency() + "accountOf_" +
-                account.getLogin().substring(account.getLogin().length()-3, account.getLogin().length())
-                + account.getPassword().substring(account.getPassword().length()-3, account.getPassword().length()) + ".txt");
-        safeToFile.println(account.getFirstName());
-        safeToFile.println(account.getLastName());
-        safeToFile.println(account.getLogin());
-        safeToFile.println(account.getPassword());
-        safeToFile.println(account.getBalance());
-        safeToFile.println(account.getCurrency());
-        safeToFile.close();
-    }
 
     public static File checkIfAccountExist(File file) throws FileNotFoundException {
 
@@ -128,7 +153,7 @@ public class Account {
             }
             while (!answer.equalsIgnoreCase("y") && !answer.equalsIgnoreCase("n"));
 
-            if (answer.equalsIgnoreCase("y")) file = setYourNewAccount();
+            if (answer.equalsIgnoreCase("y")) setYourNewAccount();
 
             else {
                 System.out.println("Try to log in once again...");
@@ -150,7 +175,7 @@ public class Account {
         accountDataSet[5]);
     }
 
-    public static void displayDashboard(Account existingAccount) throws FileNotFoundException {
+    public static void displayDashboard(Account existingAccount) {
         System.out.println();
         System.out.println("---------------------------------------------------------------");
         System.out.println("Name: " + existingAccount.getFirstName() + " " +
@@ -169,24 +194,33 @@ public class Account {
         System.out.println("7. Logout");
     }
 
-    public static void deposit(File file) throws IOException {
-        Account userAccount = collectDataFromFile(file);
+    public static void deposit(Account userAccount) throws IOException {
 
         Scanner question = new Scanner (System.in);
         System.out.print("How much would you like to deposit?: ");
         double deposit = question.nextDouble();
         userAccount.balance += deposit;
-        String depositInformation = "You have deposited " + deposit + " " + userAccount.currency +
+        String depositInformation = "You have deposited " + deposit + " " + userAccount.getCurrency() +
                 ", your new balance is: "
-                + userAccount.balance + " " + userAccount.currency;
+                + userAccount.getBalance() + " " + userAccount.getCurrency();
         System.out.println(depositInformation);
 
-        saveToFile(userAccount);
-        saveHistoryToFile(depositInformation, userAccount.login, userAccount.password, userAccount.currency);
+
+        try {
+            Connection conn = DBConnection.connectionProcedure();
+            Statement stmt = conn.createStatement();
+            DBConnection.saveOperationsHistory(userAccount, stmt, depositInformation);
+            DBConnection.saveAccountBalance(userAccount, stmt);
+            stmt.close();
+        } catch (SQLException throwables) {
+            System.out.println("--------------------------");
+            System.out.println("Statement creation failed!");
+            System.out.println("--------------------------");
+        }
+
     }
 
-    public static void withdrawal(File file) throws IOException {
-        Account userAccount = collectDataFromFile(file);
+    public static void withdrawal(Account userAccount) throws IOException {
 
         Scanner question = new Scanner (System.in);
         double withdrawal;
@@ -197,13 +231,22 @@ public class Account {
         } while (withdrawal > userAccount.balance);
 
         userAccount.balance -= withdrawal;
-        String depositInformation = "You have withdrawn " + withdrawal + " " + userAccount.currency + ", your new balance is: "
-                + userAccount.balance + " " + userAccount.currency;
-        System.out.println(depositInformation);
+        String withdrawalInformation = "You have withdrawn " + withdrawal + " "
+                + userAccount.getCurrency() + ", your new balance is: "
+                + userAccount.getBalance() + " " + userAccount.getCurrency();
+        System.out.println(withdrawalInformation);
 
-        saveToFile(userAccount);
-        saveHistoryToFile(depositInformation, userAccount.login, userAccount.password, userAccount.currency);
-
+        try {
+            Connection conn = DBConnection.connectionProcedure();
+            Statement stmt = conn.createStatement();
+            DBConnection.saveOperationsHistory(userAccount, stmt, withdrawalInformation);
+            DBConnection.saveAccountBalance(userAccount, stmt);
+            stmt.close();
+        } catch (SQLException throwables) {
+            System.out.println("--------------------------");
+            System.out.println("Statement creation failed!");
+            System.out.println("--------------------------");
+        }
     }
 
     private static void saveHistoryToFile(String info, String login, String password, String currency) throws IOException {
@@ -249,7 +292,7 @@ public class Account {
         }
     }
 
-    public static void changePassword(File file) throws IOException {
+    /*public static void changePassword(File file) throws IOException {
         Account existingAccount = Account.collectDataFromFile(file);
         String newPassword1, newPassword2;
         Scanner changePassword = new Scanner(System.in);
@@ -447,7 +490,7 @@ public class Account {
 
         return new double[]{USDSellRate/100, USDBuyRate/100, EURSellRate/100, EURBuyRate/100, GBPSellRate/100, GBPBuyRate/100};
     }
-
+*/
 }
 
 

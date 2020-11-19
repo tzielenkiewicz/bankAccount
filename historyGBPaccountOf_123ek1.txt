@@ -1,5 +1,0 @@
-08-10-2020: You have deposited 7.0 GBP, your new balance is: 7.0 GBP
-08-10-2020: You have bought 5.0 GBP, your new balance is 12.0 GBP
-04-11-2020: You have sold 2.0 GBP, your new balance is 10.0 GBP
-04-11-2020: You have sold 3.0 GBP, your new balance is 7.0 GBP
-04-11-2020: You have sold 2.0 GBP, your new balance is 5.0 GBP
