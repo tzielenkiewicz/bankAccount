@@ -1,14 +1,6 @@
 package myGitProjects;
 
-import org.w3c.dom.ls.LSOutput;
-
-import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
@@ -16,14 +8,8 @@ public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Scanner initialQuestions = new Scanner(System.in);
         Account existingAccount = null;
-        /*File accountFile = null;
-        String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-        String DB_URL = "jdbc:mysql://localhost/test";
-        String USER = "root";
-        String PASSWORD = "Tomeczek1"; */
 
         System.out.println("Welcome to Tee Bank!");
-        //DBConnection myConnection = new DBConnection(JDBC_DRIVER, DB_URL, USER, PASSWORD);
         String answer;
 
         do {
@@ -34,8 +20,7 @@ public class Main {
 
             if (answer.equalsIgnoreCase("n")) {
                 Account.setYourNewAccount();
-                //Account.checkIfAccountExist(accountFile = Account.setYourNewAccount());
-            }
+                }
 
             else if (answer.equalsIgnoreCase("y")) {
                 existingAccount = Account.loginProcedure();
@@ -60,7 +45,7 @@ public class Main {
                         case 4 -> {Account.changePassword(existingAccount);
                             shouldContinue = false;
                         }
-/*
+
                         case 5 -> {
                             System.out.println("You can create an account in USD (1), EUR (2) or GPB (3)");
                             System.out.print("What is your choice?: ");
@@ -68,12 +53,12 @@ public class Main {
                             byte choice = currencyChoice.nextByte();
 
                             String currency;
-                            if (choice == 1) Account.createCurrencyAccount(currency = "USD", accountFile);
-                            else if (choice == 2) Account.createCurrencyAccount(currency = "EUR", accountFile);
-                            else if (choice == 3) Account.createCurrencyAccount(currency = "GBP", accountFile);
+                            if (choice == 1) Account.createCurrencyAccount(currency = "USD", existingAccount);
+                            else if (choice == 2) Account.createCurrencyAccount(currency = "EUR", existingAccount);
+                            else if (choice == 3) Account.createCurrencyAccount(currency = "GBP", existingAccount);
                         }
-                        case 6 -> currencyAccountsOperation(existingAccount);
-*/
+                        case 6 -> System.out.println("currencyAccountsOperation(existingAccount)");
+
                         case 7 -> {
                             System.out.println("Have a nice day, wish to see you soon!");
                             System.out.println("Logging out...");

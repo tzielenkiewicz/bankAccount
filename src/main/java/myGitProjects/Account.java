@@ -1,13 +1,11 @@
 package myGitProjects;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Random;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 public class Account {
@@ -210,17 +208,24 @@ public class Account {
         DBConnection.saveNewPassword(newPassword1, existingAccount.getLogin());
 
     }
-/*
-    public static void createCurrencyAccount(String currency, File file) throws FileNotFoundException {
+
+    public static void createCurrencyAccount(String currency, Account account) {
+
+
+        Account currencyAccount = new Account (account.getFirstName(), account.getLastName(),
+                account.getLogin(), account.getPassword(), 0, currency);
+        Connection conn = DBConnection.connectionProcedure();
+        try {
+            Statement stmt = conn.createStatement();
+            DBConnection.createNewAccount(currencyAccount, stmt);
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
         System.out.println("Congratulations, we have just created an account in " + currency + " for you.");
-
-        Account currencyAccount = new Account (Account.collectDataFromFile(file).getFirstName(),
-                Account.collectDataFromFile(file).getLastName(),
-                Account.collectDataFromFile(file).getLogin(),
-                Account.collectDataFromFile(file).getPassword(), 0, currency);
-        saveToFile(currencyAccount);
     }
-
+/*
     public static void buyCurrency(File currencyFile, File accountFile) throws IOException {
         Account currencyAccount = collectDataFromFile(currencyFile);
         Account PLNAccount = collectDataFromFile(accountFile);
