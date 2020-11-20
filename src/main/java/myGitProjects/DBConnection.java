@@ -113,17 +113,15 @@ public class DBConnection {
             stmt = conn.createStatement();
             String sql;
             sql = "SELECT customers.name, customers.lastName, accounts.currentBalance FROM customers, accounts WHERE customers.login = '"
-                    + login + "' AND customers.ID = accounts.customerID;";
+                    + login + "' AND customers.password = '" + password + "' AND customers.ID = accounts.customerID;";
             ResultSet rs = stmt.executeQuery(sql);
             String name, surname;
             double balance;
             while (rs.next()) {
                 name = rs.getString("name");
-                System.out.println(name);
                 surname = rs.getString("lastName");
-                System.out.println(surname);
                 balance = rs.getDouble("currentBalance");
-                System.out.println(balance);
+
                 existingAccount = new Account(name, surname, login, password, balance, "PLN");
 
             }

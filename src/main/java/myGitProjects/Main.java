@@ -23,7 +23,13 @@ public class Main {
                 }
 
             else if (answer.equalsIgnoreCase("y")) {
-                existingAccount = Account.loginProcedure();
+                for (int i = 0; i < 3; i++) {
+                    existingAccount = Account.loginProcedure();
+                    if (existingAccount == null) System.out.println
+                            ("Login or password is is incorrect! Try once again");
+                    else break;
+                }
+
                 if (existingAccount == null) {
                     System.out.println("Seems that you are first time here!");
                     Account.setYourNewAccount();
