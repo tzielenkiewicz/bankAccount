@@ -159,7 +159,6 @@ public class DBConnection {
                 System.out.print(info + ". ");
                 balance = rs.getDouble("balance");
                 System.out.println("Balance: " + balance + currency + ".");
-
             }
 
             rs.close();
@@ -168,5 +167,23 @@ public class DBConnection {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public static void saveNewPassword(String password, String login) {
+        Connection conn = DBConnection.connectionProcedure();
+
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE customers SET password = '"
+                    + password + "' WHERE login = '"
+                    + login + "';");
+
+            stmt.close();
+        } catch (SQLException throwables) {
+            System.out.println("------------------");
+            System.out.println("Connection failed!");
+            System.out.println("------------------");
+        }
+        System.out.println("You have to logout now...");
     }
 }
