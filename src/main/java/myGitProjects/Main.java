@@ -56,7 +56,7 @@ public class Main {
                     switch (userChoice) {
                         case 1 -> Account.deposit(existingAccount);
                         case 2 -> Account.withdrawal(existingAccount);
-                        case 3 -> System.out.println("Collect history from DB");
+                        case 3 -> DBConnection.collectOperationsHistory(existingAccount.getLogin(), existingAccount.getCurrency());
                         case 4 -> {
                             System.out.println("Change password");
                             shouldContinue = false;

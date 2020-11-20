@@ -1,9 +1,6 @@
 package myGitProjects;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 
 public class DBConnection {
@@ -104,6 +101,72 @@ public class DBConnection {
             System.out.println("------------------");
             System.out.println("Connection failed!");
             System.out.println("------------------");
+        }
+    }
+
+    public static Account collectAccountData(String login, String password) {
+        Connection conn = DBConnection.connectionProcedure();
+
+        Statement stmt = null;
+        Account existingAccount = null;
+        try {
+            stmt = conn.createStatement();
+            String sql;
+            sql = "SELECT customers.name, customers.lastName, accounts.currentBalance FROM customers, accounts WHERE customers.login = '"
+                    + login + "' AND customers.ID = accounts.customerID;";
+            ResultSet rs = stmt.executeQuery(sql);
+            String name, surname;
+            double balance;
+            while (rs.next()) {
+                name = rs.getString("name");
+                System.out.println(name);
+                surname = rs.getString("lastName");
+                System.out.println(surname);
+                balance = rs.getDouble("currentBalance");
+                System.out.println(balance);
+                existingAccount = new Account(name, surname, login, password, balance, "PLN");
+
+            }
+
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return existingAccount;
+    }
+
+    public static void collectOperationsHistory(String login, String currency) {
+        Connection conn = DBConnection.connectionProcedure();
+
+        Statement stmt = null;
+
+        try {
+            stmt = conn.createStatement();
+            String sql;
+            sql = "SELECT operations.date, operations.info, operations.balance FROM operations, customers, accounts WHERE customers.login = '"
+                    + login
+                    + "' AND customers.ID = accounts.customerID AND operations.accountID = accounts.ID;";
+            ResultSet rs = stmt.executeQuery(sql);
+            Date date;
+            String info;
+            double balance;
+            while (rs.next()) {
+                date = rs.getDate("date");
+                System.out.print("Date: " + date + ". ");
+                info = rs.getString("info");
+                System.out.print(info + ". ");
+                balance = rs.getDouble("balance");
+                System.out.println("Balance: " + balance + currency + ".");
+
+            }
+
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 }
