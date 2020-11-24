@@ -2,6 +2,7 @@ package myGitProjects;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class DBConnection {
     private String JDBC_DRIVER;
@@ -40,12 +41,10 @@ public class DBConnection {
         String PASSWORD = "Tomeczek1";
         Connection conn = null;
         try {
-            System.out.println("Connecting to DB...");
             Class.forName(JDBC_DRIVER);
 
             conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-            System.out.println("Connection ready!");
-            //Thread.sleep(500);
+
         } catch (ClassNotFoundException | SQLException e) {
             System.out.println("------------------");
             System.out.println("Connection failed!");
@@ -93,10 +92,12 @@ public class DBConnection {
     }
 
     public static void saveAccountBalance(Account account, Statement stmt) {
+        System.out.println("Changing " + account.getCurrency()
+                + " account balance to " + account.getBalance() + ".");
         try {
             stmt.executeUpdate("UPDATE accounts, customers SET currentBalance = "
                     + account.getBalance() + " WHERE customers.login = '"
-                    + account.getLogin() + "' AND customers.ID = accounts.customerID;");
+                    + account.getLogin() + "' AND accounts.currency = '"+ account.getCurrency() +"' AND customers.ID = accounts.customerID;");
         } catch (SQLException throwables) {
             System.out.println("------------------");
             System.out.println("Connection failed!");
@@ -104,7 +105,7 @@ public class DBConnection {
         }
     }
 
-    public static Account collectAccountData(String login, String password) {
+    public static Account collectAccountData(String login, String password, String currency) {
         Connection conn = DBConnection.connectionProcedure();
 
         Statement stmt = null;
@@ -113,7 +114,7 @@ public class DBConnection {
             stmt = conn.createStatement();
             String sql;
             sql = "SELECT customers.name, customers.lastName, accounts.currentBalance FROM customers, accounts WHERE customers.login = '"
-                    + login + "' AND customers.password = '" + password + "' AND customers.ID = accounts.customerID;";
+                    + login + "' AND customers.password = '" + password + "' AND accounts.currency = '" + currency +"' AND customers.ID = accounts.customerID;";
             ResultSet rs = stmt.executeQuery(sql);
             String name, surname;
             double balance;
@@ -122,7 +123,7 @@ public class DBConnection {
                 surname = rs.getString("lastName");
                 balance = rs.getDouble("currentBalance");
 
-                existingAccount = new Account(name, surname, login, password, balance, "PLN");
+                existingAccount = new Account(name, surname, login, password, balance, currency);
 
             }
 
@@ -144,7 +145,7 @@ public class DBConnection {
             stmt = conn.createStatement();
             String sql;
             sql = "SELECT operations.date, operations.info, operations.balance FROM operations, customers, accounts WHERE customers.login = '"
-                    + login
+                    + login + "' AND accounts.currency = '" + currency
                     + "' AND customers.ID = accounts.customerID AND operations.accountID = accounts.ID;";
             ResultSet rs = stmt.executeQuery(sql);
             Date date;
@@ -184,4 +185,28 @@ public class DBConnection {
         }
         System.out.println("You have to logout now...");
     }
+
+    public static boolean checkCurrencyAccount(String login, String currency) {
+        Connection conn = DBConnection.connectionProcedure();
+
+        Statement stmt = null;
+        String expCurrency = null;
+        try {
+            stmt = conn.createStatement();
+            String sql;
+            sql = "SELECT accounts.currency FROM customers, accounts WHERE customers.login = '"
+                    + login + "' AND accounts.currency = '" + currency + "' AND customers.ID = accounts.customerID;";
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) expCurrency = rs.getString("currency");
+
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return Objects.equals(expCurrency, currency);
+    }
+
 }

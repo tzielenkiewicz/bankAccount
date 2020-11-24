@@ -56,7 +56,7 @@ public class Account {
         String password = checkLoginPassword.nextLine();
 
 
-        return DBConnection.collectAccountData(login, password);
+        return DBConnection.collectAccountData(login, password, "PLN");
     }
     public static void setYourNewAccount() {
         Scanner initialQuestions = new Scanner(System.in);
@@ -136,7 +136,7 @@ public class Account {
         System.out.println("7. Logout");
     }
 
-    public static void deposit(Account userAccount) throws IOException {
+    public static void deposit(Account userAccount) {
 
         Scanner question = new Scanner (System.in);
         System.out.print("How much would you like to deposit?: ");
@@ -162,7 +162,7 @@ public class Account {
 
     }
 
-    public static void withdrawal(Account userAccount) throws IOException {
+    public static void withdrawal(Account userAccount) {
 
         Scanner question = new Scanner (System.in);
         double withdrawal;
