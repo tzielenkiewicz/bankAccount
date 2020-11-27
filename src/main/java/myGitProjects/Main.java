@@ -115,8 +115,8 @@ public class Main {
                 case 1 -> Account.deposit(currencyAccount);
                 case 2 -> Account.withdrawal(currencyAccount);
                 case 3 -> DBConnection.collectOperationsHistory(currencyAccount.getLogin(), currencyAccount.getCurrency());
-                case 4 -> System.out.println("Account.buyCurrency(currencyFile, accountFile)");
-                case 5 -> System.out.println("Account.sellCurrency(currencyFile, accountFile)");
+                case 4 -> Account.buyCurrency(currencyAccount, account);
+                case 5 -> Account.sellCurrency(currencyAccount, account);
             }
         } while (choice != 6);
     }

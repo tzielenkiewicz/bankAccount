@@ -79,6 +79,7 @@ public class DBConnection {
 
     public static void saveOperationsHistory(Account account, Statement stmt, String actionInfo) {
         LocalDate today = LocalDate.now();
+
         try {
             stmt.executeUpdate("INSERT INTO operations VALUES(null, (SELECT ID FROM accounts WHERE currency = '"
                     + account.getCurrency() +"' AND customerID = (SELECT ID FROM customers WHERE login = '"

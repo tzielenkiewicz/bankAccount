@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Account {
@@ -225,17 +226,15 @@ public class Account {
 
         System.out.println("Congratulations, we have just created an account in " + currency + " for you.");
     }
-/*
-    public static void buyCurrency(File currencyFile, File accountFile) throws IOException {
-        Account currencyAccount = collectDataFromFile(currencyFile);
-        Account PLNAccount = collectDataFromFile(accountFile);
+
+    public static void buyCurrency(Account currencyAccount, Account account) {
         System.out.println("Exchange rates today:");
         System.out.println("We sell USD: " + currencyRates()[0] + ", EUR: " + currencyRates()[2] + ", GBP: "
                 + currencyRates()[4]);
         System.out.println("Wy buy USD: " + currencyRates()[1] + ", EUR: " + currencyRates()[3] + ", GBP: "
                 + currencyRates()[5]);
         Scanner currencyOperation = new Scanner (System.in);
-        System.out.println("How much " + currencyAccount.currency + " would you like to buy?");
+        System.out.println("How much " + currencyAccount.getCurrency() + " would you like to buy?");
         double deposit = currencyOperation.nextDouble();
         double PLNWithdrawal = switch (currencyAccount.getCurrency()) {
             case "USD" -> deposit * currencyRates()[0];
@@ -246,33 +245,41 @@ public class Account {
 
         double roundedDeposit = Math.round(deposit*100);
         currencyAccount.balance += roundedDeposit / 100;
-        String currencyInfo = "You have bought " + deposit + " " + currencyAccount.currency +
-                ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
-        saveToFile(currencyAccount);
-        saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
+        String currencyInfo = "You have bought " + deposit + " " + currencyAccount.getCurrency() +
+                ", your new balance is " + currencyAccount.getBalance() + " " + currencyAccount.getCurrency();
 
         double roundedPLNWithdrawal = Math.round(PLNWithdrawal*100);
-        PLNAccount.balance -= roundedPLNWithdrawal / 100;
-        String PLNInfo = "There has been " + PLNWithdrawal + " PLN withdrawn for " + currencyAccount.currency +
-                " purchase, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
-        saveToFile(PLNAccount);
-        saveHistoryToFile(PLNInfo, PLNAccount.login, PLNAccount.password, PLNAccount.currency);
+        account.balance -= roundedPLNWithdrawal / 100;
+        String PLNInfo = "There has been " + PLNWithdrawal + " PLN withdrawn for " + currencyAccount.getCurrency() +
+                " purchase, your new balance is " + account.getBalance() + " " + account.getCurrency();
+
+        try {
+            Connection conn = DBConnection.connectionProcedure();
+            Statement stmt = conn.createStatement();
+            DBConnection.saveOperationsHistory(currencyAccount, stmt, currencyInfo);
+            DBConnection.saveAccountBalance(currencyAccount, stmt);
+            DBConnection.saveOperationsHistory(account, stmt, PLNInfo);
+            DBConnection.saveAccountBalance(account, stmt);
+            stmt.close();
+        } catch (SQLException throwables) {
+            System.out.println("--------------------------");
+            System.out.println("Statement creation failed!");
+            System.out.println("--------------------------");
+        }
 
         System.out.println(currencyInfo);
         System.out.println(PLNInfo);
 
     }
 
-    public static void sellCurrency(File currencyFile, File accountFile) throws IOException {
-        Account currencyAccount = collectDataFromFile(currencyFile);
-        Account PLNAccount = collectDataFromFile(accountFile);
+    public static void sellCurrency(Account currencyAccount, Account account) {
         System.out.println("Exchange rates today:");
         System.out.println("We sell USD: " + currencyRates()[0] + ", EUR: " + currencyRates()[2] + ", GBP: "
                 + currencyRates()[4]);
         System.out.println("Wy buy USD: " + currencyRates()[1] + ", EUR: " + currencyRates()[3] + ", GBP: "
                 + currencyRates()[5]);
         Scanner currencyOperation = new Scanner (System.in);
-        System.out.println("How much " + currencyAccount.currency + " would you like to sell?");
+        System.out.println("How much " + currencyAccount.getCurrency() + " would you like to sell?");
         double withdrawal = currencyOperation.nextDouble();
         double PLNDeposit = switch (currencyAccount.getCurrency()) {
             case "USD" -> withdrawal * currencyRates()[1];
@@ -283,17 +290,27 @@ public class Account {
 
         double roundedWithdrawal = Math.round(withdrawal*100);
         currencyAccount.balance -= roundedWithdrawal/100;
-        String currencyInfo = "You have sold " + withdrawal + " " + currencyAccount.currency +
-                ", your new balance is " + currencyAccount.balance + " " + currencyAccount.currency;
-        saveToFile(currencyAccount);
-        saveHistoryToFile(currencyInfo, currencyAccount.login, currencyAccount.password, currencyAccount.currency);
+        String currencyInfo = "You have sold " + withdrawal + " " + currencyAccount.getCurrency() +
+                ", your new balance is " + currencyAccount.getBalance() + " " + currencyAccount.getCurrency();
 
         double roundedPLNDeposit = Math.round(PLNDeposit*100);
-        PLNAccount.balance += roundedPLNDeposit / 100;
-        String PLNInfo = "There has been " + PLNDeposit + " PLN deposited from " + currencyAccount.currency +
-                " sale, your new balance is " + PLNAccount.balance + " " + PLNAccount.currency;
-        saveToFile(PLNAccount);
-        saveHistoryToFile(PLNInfo, PLNAccount.login, PLNAccount.password, PLNAccount.currency);
+        account.balance += roundedPLNDeposit / 100;
+        String PLNInfo = "There has been " + PLNDeposit + " PLN deposited from " + currencyAccount.getCurrency() +
+                " sale, your new balance is " + account.getBalance() + " " + account.getCurrency();
+
+        try {
+            Connection conn = DBConnection.connectionProcedure();
+            Statement stmt = conn.createStatement();
+            DBConnection.saveOperationsHistory(currencyAccount, stmt, currencyInfo);
+            DBConnection.saveAccountBalance(currencyAccount, stmt);
+            DBConnection.saveOperationsHistory(account, stmt, PLNInfo);
+            DBConnection.saveAccountBalance(account, stmt);
+            stmt.close();
+        } catch (SQLException throwables) {
+            System.out.println("--------------------------");
+            System.out.println("Statement creation failed!");
+            System.out.println("--------------------------");
+        }
 
         System.out.println(currencyInfo);
         System.out.println(PLNInfo);
@@ -313,7 +330,7 @@ public class Account {
 
         return new double[]{USDSellRate/100, USDBuyRate/100, EURSellRate/100, EURBuyRate/100, GBPSellRate/100, GBPBuyRate/100};
     }
-*/
+
 }
 
 
